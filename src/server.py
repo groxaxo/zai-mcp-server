@@ -11,6 +11,7 @@ import asyncio
 import aiohttp
 from bs4 import BeautifulSoup
 from openai import AsyncOpenAI
+from urllib.parse import urlparse, parse_qs, unquote
 
 ZAI_API_KEY = os.environ.get("ZAI_API_KEY", "")
 ZAI_BASE_URL = "https://api.z.ai/api/paas/v4"
@@ -52,6 +53,11 @@ class ZAIMCPServer:
                         )
 
                         if url:
+                            parsed = urlparse(url)
+                            if parsed.netloc and "duckduckgo.com" in parsed.netloc and "uddg" in parsed.query:
+                                url = unquote(parse_qs(parsed.query).get("uddg", [""])[0])
+                            elif url.startswith("//"):
+                                url = "https:" + url
                             results.append(
                                 {
                                     "title": title,
